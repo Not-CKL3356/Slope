@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Full Screen Password Protected Slope Game</title>
+  <title>Multi-Game Portal Screen</title>
   <style>
-    /* Force the entire web page body to have no margins or scrollbars */
+    /* Force full viewport coverage without scrollbars */
     html, body {
       margin: 0;
       padding: 0;
@@ -15,7 +15,7 @@
       background-color: #000;
     }
 
-    /* Game wrapper spans 100% of the viewport width and height */
+    /* Outer wrapper filling screen canvas */
     .game-wrapper {
       position: relative; 
       width: 100vw; 
@@ -23,14 +23,14 @@
       overflow: hidden;
     }
 
-    /* Secret container that reveals the game */
+    /* Initially hidden game iframe block */
     #game-container {
       display: none;
       width: 100%;
       height: 100%;
     }
 
-    /* Forces iframe to stretch completely to all edges */
+    /* Stretches the loaded iframe to browser borders */
     .game-wrapper iframe {
       position: absolute; 
       top: 0; 
@@ -40,7 +40,35 @@
       border: none;
     }
 
-    /* Password gate overlay screen filling the viewport */
+    /* Floating Exit/Logout Button Styling */
+    .logout-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 20; /* Ensures it stays on top of the iframe content */
+      background: rgba(255, 74, 74, 0.85);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .logout-btn:hover {
+      background: rgb(255, 40, 40);
+      transform: scale(1.05);
+    }
+
+    .logout-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Login wall interface overlay */
     .password-gate {
       position: absolute;
       top: 0;
@@ -107,22 +135,26 @@
 
   <div class="game-wrapper">
 
-    <!-- Password Screen -->
+    <!-- Universal Login Gate -->
     <div id="auth-gate" class="password-gate">
       <div class="password-box">
-        <h3>Slope Game Access</h3>
-        <p style="color: #aaa; font-size: 14px;">Enter the password to play</p>
-        <input type="password" id="pass-input" placeholder="Password">
+        <h3>Arcade Vault Access</h3>
+        <p style="color: #aaa; font-size: 14px;">Enter a secret password to unlock a game</p>
+        <input type="password" id="pass-input" placeholder="Enter Game Secret Password...">
         <button onclick="verifyPassword()">Unlock & Play</button>
-        <div id="error-message" class="error-msg">Incorrect password. Try again!</div>
+        <div id="error-message" class="error-msg">Unknown password phrase. Try again!</div>
       </div>
     </div>
 
-    <!-- Hidden Game Iframe Container -->
+    <!-- Hidden Game Player Window -->
     <div id="game-container">
+      <!-- Floating Logout Action Trigger -->
+      <button class="logout-btn" onclick="logoutGame()">❌ Exit Game</button>
+      
       <iframe 
-        src="https://ubggo.github.io/ub-games/slope/" 
-        title="Slope Game" 
+        id="game-frame"
+        src="" 
+        title="Game Player" 
         allowfullscreen="true"
         webkitallowfullscreen="true"
         mozallowfullscreen="true">
@@ -132,20 +164,48 @@
   </div>
 
   <script>
-    function verifyPassword() {
-      const userInput = document.getElementById('pass-input').value;
-      const errorMessage = document.getElementById('error-message');
-      const secretPassword = "play123"; 
+    // Configuration dictionary pairing keys with their respective iframe assets
+    const gameDatabase = {
+      "slope": "https://ubggo.github.io/ub-games/slope/",
+      "dawn": "https://bchs-html-games.github.io/10-Minutes-Till-Dawn/"
+    };
 
-      if (userInput === secretPassword) {
+    function verifyPassword() {
+      const userInput = document.getElementById('pass-input').value.trim();
+      const errorMessage = document.getElementById('error-message');
+      const gameFrame = document.getElementById('game-frame');
+
+      // Check if the input key exists in the database
+      if (gameDatabase.hasOwnProperty(userInput)) {
+        // Feed the specific game source URL into the empty iframe
+        gameFrame.src = gameDatabase[userInput];
+        
+        // Hide password barrier and display the target game frame
         document.getElementById('auth-gate').style.display = 'none';
         document.getElementById('game-container').style.display = 'block';
+        errorMessage.style.display = 'none'; // Clear error on successful login
       } else {
+        // Display error message for incorrect codes
         errorMessage.style.display = 'block';
         document.getElementById('pass-input').value = '';
       }
     }
 
+    function logoutGame() {
+      const gameFrame = document.getElementById('game-frame');
+      
+      // 1. Completely blank out the iframe URL to cut audio and stop game loops
+      gameFrame.src = "";
+      
+      // 2. Clear the password text field
+      document.getElementById('pass-input').value = '';
+      
+      // 3. Swap layout panels back to default state
+      document.getElementById('game-container').style.display = 'none';
+      document.getElementById('auth-gate').style.display = 'flex';
+    }
+
+    // Capture the 'Enter' key inside the input block
     document.getElementById('pass-input').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         verifyPassword();
