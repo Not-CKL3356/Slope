@@ -3,24 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Protected Slope Game</title>
+  <title>Full Screen Password Protected Slope Game</title>
   <style>
-    /* Responsive game container wrapper */
-    .game-wrapper {
-      position: relative; 
-      width: 100%; 
-      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-      height: 0; 
+    /* Force the entire web page body to have no margins or scrollbars */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
       background-color: #000;
     }
 
-    /* Secret iframe container - remains hidden until password matches */
-    #game-container {
-      display: none;
+    /* Game wrapper spans 100% of the viewport width and height */
+    .game-wrapper {
+      position: relative; 
+      width: 100vw; 
+      height: 100vh;
+      overflow: hidden;
     }
 
-    /* Style the iframe to fit the responsive container */
+    /* Secret container that reveals the game */
+    #game-container {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Forces iframe to stretch completely to all edges */
     .game-wrapper iframe {
       position: absolute; 
       top: 0; 
@@ -30,7 +40,7 @@
       border: none;
     }
 
-    /* Stylised password gate screen overlay */
+    /* Password gate overlay screen filling the viewport */
     .password-gate {
       position: absolute;
       top: 0;
@@ -95,10 +105,9 @@
 </head>
 <body>
 
-  <!-- Responsive Parent Wrapper -->
   <div class="game-wrapper">
 
-    <!-- Screen 1: The Password Gate Box -->
+    <!-- Password Screen -->
     <div id="auth-gate" class="password-gate">
       <div class="password-box">
         <h3>Slope Game Access</h3>
@@ -109,12 +118,14 @@
       </div>
     </div>
 
-    <!-- Screen 2: The Embedded Game (Hidden Initially) -->
+    <!-- Hidden Game Iframe Container -->
     <div id="game-container">
       <iframe 
-        src="https://ubggo.github.io/ub-games/slope/" 
+        src="https://github.io" 
         title="Slope Game" 
-        allowfullscreen>
+        allowfullscreen="true"
+        webkitallowfullscreen="true"
+        mozallowfullscreen="true">
       </iframe>
     </div>
 
@@ -124,23 +135,17 @@
     function verifyPassword() {
       const userInput = document.getElementById('pass-input').value;
       const errorMessage = document.getElementById('error-message');
-      
-      // Define your password here
       const secretPassword = "play123"; 
 
       if (userInput === secretPassword) {
-        // Hide password prompt screen
         document.getElementById('auth-gate').style.display = 'none';
-        // Reveal and load the iframe
         document.getElementById('game-container').style.display = 'block';
       } else {
-        // Show error notification
         errorMessage.style.display = 'block';
         document.getElementById('pass-input').value = '';
       }
     }
 
-    // Allow user to press 'Enter' inside the text field to submit
     document.getElementById('pass-input').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         verifyPassword();
